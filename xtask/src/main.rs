@@ -96,7 +96,10 @@ fn bundle(root: &Path) -> Res {
     if installers.is_empty() {
         return Err(format!("no NSIS installer found in {}", dir.display()).into());
     }
-    collect(root, &installers)
+    // Collect the installer(s) plus their updater `.sig` signatures.
+    let mut to_collect = installers;
+    to_collect.extend(find_with_ext(&dir, "sig"));
+    collect(root, &to_collect)
 }
 
 /// Build the release exe and zip it into `release/` as a portable distribution.
@@ -224,7 +227,12 @@ fn write_update_manifest(root: &Path, version: &str, artifacts: &[PathBuf]) -> R
         eprintln!("⚠ no installer artifact; skipping update manifest");
         return Ok(());
     };
-    let name = installer.file_name().and_then(OsStr::to_str).unwrap_or("");
+    // GitHub replaces spaces in release-asset names with dots; match that in the download URL.
+    let name = installer
+        .file_name()
+        .and_then(OsStr::to_str)
+        .unwrap_or("")
+        .replace(' ', ".");
     let repo = env::var("GITHUB_REPOSITORY").unwrap_or_else(|_| "OWNER/REPO".into());
     let url = format!("https://github.com/{repo}/releases/download/v{version}/{name}");
 

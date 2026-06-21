@@ -96,6 +96,11 @@ fn bundle(root: &Path) -> Res {
 /// Build the production exe and zip it into `release/` as a portable distribution.
 fn portable(root: &Path) -> Res {
     tauri_build(root, true)?;
+    zip_portable(root)
+}
+
+/// Zip the already-built production exe into `release/` (no rebuild).
+fn zip_portable(root: &Path) -> Res {
     let exe = root.join("app/src-tauri/target/release/vbl-pro-2.exe");
     if !exe.exists() {
         return Err(format!("release exe not found at {}", exe.display()).into());
@@ -106,6 +111,16 @@ fn portable(root: &Path) -> Res {
     let out = dir.join(format!("vbl-pro-2-{version}-portable-x64.zip"));
     zip_files(&out, &[(&exe, "vbl-pro-2.exe")])?;
     println!("✓ wrote {}", out.display());
+    Ok(())
+}
+
+/// Empty the `release/` directory so stale artifacts from prior builds can't leak into a release.
+fn clean_release_dir(root: &Path) -> Res {
+    let dir = root.join("release");
+    if dir.exists() {
+        fs::remove_dir_all(&dir)?;
+    }
+    fs::create_dir_all(&dir)?;
     Ok(())
 }
 
@@ -182,8 +197,10 @@ fn release(root: &Path, version: Option<String>, upload: bool, allow_dirty: bool
     let version = read_version(root)?;
     println!("▶ releasing v{version}");
 
+    clean_release_dir(root)?;
     bundle(root)?;
-    portable(root)?;
+    // Reuse the production exe the installer build already produced — no second compile.
+    zip_portable(root)?;
 
     let release_dir = root.join("release");
     let installers = find_with_ext(&release_dir, "exe");
@@ -208,7 +225,18 @@ fn release(root: &Path, version: Option<String>, upload: bool, allow_dirty: bool
 }
 
 fn write_update_manifest(root: &Path, version: &str, artifacts: &[PathBuf]) -> Res {
-    let Some(installer) = artifacts.iter().find(|p| has_ext(p, "exe")) else {
+    // Pick the installer for *this* version (defensive against any stale artifacts).
+    let installer = artifacts
+        .iter()
+        .find(|p| {
+            has_ext(p, "exe")
+                && p.file_name()
+                    .and_then(OsStr::to_str)
+                    .map(|n| n.contains(version))
+                    .unwrap_or(false)
+        })
+        .or_else(|| artifacts.iter().find(|p| has_ext(p, "exe")));
+    let Some(installer) = installer else {
         eprintln!("⚠ no installer artifact; skipping update manifest");
         return Ok(());
     };

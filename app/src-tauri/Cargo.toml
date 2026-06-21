@@ -22,14 +22,9 @@ specta = { version = "=2.0.0-rc.25", features = ["derive", "function"] }
 specta-typescript = "0.0.12"
 tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
 
+# Tuned for fast release builds. This app is event/timer-driven (Win32 hooks, overlay),
+# not CPU-bound, so LTO + single-codegen-unit buy little runtime but cost a lot of compile time.
 [profile.release]
-lto = "thin"
-codegen-units = 1
-strip = true
-
-[profile.fast]
-inherits = "release"
-opt-level = 1
 lto = false
 codegen-units = 16
-strip = false
+strip = true

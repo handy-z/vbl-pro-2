@@ -4524,7 +4524,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -4534,7 +4534,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-engine"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -4546,7 +4546,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-ipc"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "specta",
@@ -4555,7 +4555,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-platform-win"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "vbl-core",
  "windows 0.58.0",
@@ -4563,7 +4563,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-pro-2"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -4582,7 +4582,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-scripting"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "mlua",
  "thiserror 1.0.69",

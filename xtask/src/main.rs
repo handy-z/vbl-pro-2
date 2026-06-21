@@ -18,11 +18,7 @@ fn main() {
 
     let result = match task {
         "codegen" => codegen(&root),
-        "build" => build(
-            &root,
-            has_flag(rest, "--fast"),
-            has_flag(rest, "--exe-only"),
-        ),
+        "build" => build(&root, has_flag(rest, "--exe-only")),
         "bundle" => bundle(&root),
         "portable" => portable(&root),
         "sign" => sign(&root, &positional(rest)),
@@ -57,40 +53,35 @@ fn codegen(root: &Path) -> Res {
     )
 }
 
-fn build(root: &Path, fast: bool, exe_only: bool) -> Res {
+fn build(root: &Path, exe_only: bool) -> Res {
     codegen(root)?;
-    run("bun", ["run", "--cwd", "app/ui", "build"], root)?;
-    let profile = if fast { "fast" } else { "release" };
     if exe_only {
-        run(
-            "cargo",
-            [
-                "build",
-                "--manifest-path",
-                APP_MANIFEST,
-                "--profile",
-                profile,
-            ],
-            root,
-        )?;
-        let exe = root
-            .join("app/src-tauri/target")
-            .join(profile)
-            .join("vbl-pro-2.exe");
+        tauri_build(root, true)?;
+        let exe = root.join("app/src-tauri/target/release/vbl-pro-2.exe");
         collect(root, &[exe])
     } else {
         bundle(root)
     }
 }
 
-fn bundle(root: &Path) -> Res {
+/// Build the UI then the production app via the Tauri CLI. `no_bundle` skips the installer.
+/// This must go through `cargo tauri build` (not plain `cargo build`), otherwise the exe runs in
+/// dev mode and points at the dev-server URL instead of the embedded UI.
+fn tauri_build(root: &Path, no_bundle: bool) -> Res {
     if !has_tool("cargo", ["tauri", "--version"], root) {
         return Err("`cargo tauri` not found — install with `cargo install tauri-cli`".into());
     }
-    // Build the UI first (Tauri's beforeBuildCommand is a no-op to avoid a cwd-relative hook);
-    // `cargo tauri build` then bundles the prebuilt dist.
     run("bun", ["run", "--cwd", "app/ui", "build"], root)?;
-    run("cargo", ["tauri", "build"], &root.join("app/src-tauri"))?;
+    let args: Vec<&str> = if no_bundle {
+        vec!["tauri", "build", "--no-bundle"]
+    } else {
+        vec!["tauri", "build"]
+    };
+    run("cargo", args, &root.join("app/src-tauri"))
+}
+
+fn bundle(root: &Path) -> Res {
+    tauri_build(root, false)?;
     let dir = root.join("app/src-tauri/target/release/bundle/nsis");
     let installers = find_with_ext(&dir, "exe");
     if installers.is_empty() {
@@ -102,15 +93,9 @@ fn bundle(root: &Path) -> Res {
     collect(root, &to_collect)
 }
 
-/// Build the release exe and zip it into `release/` as a portable distribution.
+/// Build the production exe and zip it into `release/` as a portable distribution.
 fn portable(root: &Path) -> Res {
-    // The release binary embeds the UI (frontendDist), so build it first.
-    run("bun", ["run", "--cwd", "app/ui", "build"], root)?;
-    run(
-        "cargo",
-        ["build", "--manifest-path", APP_MANIFEST, "--release"],
-        root,
-    )?;
+    tauri_build(root, true)?;
     let exe = root.join("app/src-tauri/target/release/vbl-pro-2.exe");
     if !exe.exists() {
         return Err(format!("release exe not found at {}", exe.display()).into());

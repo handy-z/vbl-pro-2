@@ -46,6 +46,13 @@ export function Config({
             onChange={(e) => setMacro({ enabled: e.target.checked })}
           />
         </Row>
+        <Row label="Arm on start">
+          <input
+            type="checkbox"
+            checked={config.armOnStart}
+            onChange={(e) => set({ armOnStart: e.target.checked })}
+          />
+        </Row>
         <Row label="Jumpset key">
           <input
             value={config.macroKeys.jumpsetKey}

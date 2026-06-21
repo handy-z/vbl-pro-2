@@ -19,6 +19,8 @@ export const commands = {
 	script: string | null,
 	dsl: string | null,
 	unfocusedPanicMs: number | null,
+	/**  Arm the engine automatically when the app launches. */
+	armOnStart: boolean,
 } | null>("switch_profile", { name }),
 	saveProfileAs: (name: string) => __TAURI_INVOKE<void>("save_profile_as", { name }),
 	deleteProfile: (name: string) => __TAURI_INVOKE<{
@@ -30,6 +32,8 @@ export const commands = {
 	script: string | null,
 	dsl: string | null,
 	unfocusedPanicMs: number | null,
+	/**  Arm the engine automatically when the app launches. */
+	armOnStart: boolean,
 } | null>("delete_profile", { name }),
 	/**  Write the active profile to a JSON file the user picked. */
 	exportProfile: (path: string) => typedError<null, string>(__TAURI_INVOKE("export_profile", { path })),
@@ -215,6 +219,8 @@ export type VblSettings_Deserialize = {
 	script?: string | null,
 	dsl?: string | null,
 	unfocusedPanicMs?: number | null,
+	/**  Arm the engine automatically when the app launches. */
+	armOnStart?: boolean,
 };
 
 export type VblSettings_Serialize = {
@@ -226,6 +232,8 @@ export type VblSettings_Serialize = {
 	script: string | null,
 	dsl: string | null,
 	unfocusedPanicMs: number | null,
+	/**  Arm the engine automatically when the app launches. */
+	armOnStart: boolean,
 };
 
 /* Tauri Specta runtime */

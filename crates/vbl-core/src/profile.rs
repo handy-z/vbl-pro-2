@@ -113,6 +113,13 @@ pub struct VblSettings {
 
     #[serde(default)]
     pub unfocused_panic_ms: Option<u64>,
+    /// Arm the engine automatically when the app launches.
+    #[serde(default = "default_true")]
+    pub arm_on_start: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 pub fn default_capture() -> Vec<CaptureState> {
@@ -152,6 +159,7 @@ impl Default for VblSettings {
             script: None,
             dsl: None,
             unfocused_panic_ms: None,
+            arm_on_start: true,
         }
     }
 }

@@ -6,7 +6,7 @@ use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tauri::{Manager, State, WindowEvent};
+use tauri::{Manager, State};
 use tauri_specta::{collect_commands, collect_events, Builder, Event};
 use vbl_core::color::{Rgb, Tolerance};
 use vbl_core::profile::VblSettings;
@@ -277,17 +277,18 @@ fn main() {
         .expect("failed to export typescript bindings");
 
     tauri::Builder::default()
+        // single-instance must be registered first so a second launch is rejected early.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+            }
+        }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(builder.invoke_handler())
-
-        .on_window_event(|window, event| {
-            if let WindowEvent::CloseRequested { api, .. } = event {
-                api.prevent_close();
-                let _ = window.hide();
-            }
-        })
         .setup(move |app| {
 
             builder.mount_events(app);
@@ -295,6 +296,7 @@ fn main() {
 
             let store = Store::new(Store::default_dir());
             let (active_name, settings) = store.load_active_or_init();
+            let arm_on_start = settings.arm_on_start;
 
             let handle = app.handle().clone();
             let runtime = Runtime::start(settings, move |update| match update {
@@ -321,6 +323,10 @@ fn main() {
                     let _ = LogEvent(log).emit(&handle);
                 }
             });
+
+            if arm_on_start {
+                runtime.arm();
+            }
 
             app.manage(AppState {
                 runtime: Mutex::new(Some(runtime)),

@@ -1,0 +1,20 @@
+[package]
+name = "vbl-engine"
+description = "Engine orchestration: real-thread scheduler + channels wiring core to platform."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+vbl-core = { path = "../vbl-core" }
+vbl-ipc = { path = "../vbl-ipc" }
+vbl-scripting = { path = "../vbl-scripting" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[features]
+
+specta = ["vbl-ipc/specta", "vbl-core/specta"]
+
+[target.'cfg(windows)'.dependencies]
+vbl-platform-win = { path = "../vbl-platform-win" }

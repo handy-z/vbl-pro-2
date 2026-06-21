@@ -1,0 +1,15 @@
+[package]
+name = "xtask"
+description = "Workspace build and release automation."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "xtask"
+path = "src/main.rs"
+
+[dependencies]
+serde_json = { workspace = true }
+toml_edit = "0.22"
+zip = { version = "2", default-features = false, features = ["deflate"] }

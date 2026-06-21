@@ -1,0 +1,16 @@
+[package]
+name = "vbl-core"
+description = "Pure, platform-agnostic core of VBL Pro 2: state model, macro logic, traits."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+specta = { workspace = true, optional = true }
+
+[features]
+specta = ["dep:specta"]

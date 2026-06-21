@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  core-purity:
+    name: core purity (linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p vbl-core
+      - run: cargo test -p vbl-core
+
+  windows:
+    name: build, lint & test (windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: rustfmt
+        run: |
+          cargo fmt --all -- --check
+          cargo fmt --manifest-path app/src-tauri/Cargo.toml -- --check
+      - name: clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: test
+        run: cargo test
+
+      - name: Install UI deps
+        run: bun install --cwd app/ui --frozen-lockfile
+      - name: Bindings drift check
+        run: |
+          cargo xtask codegen
+          git diff --exit-code -- app/ui/src/bindings.ts
+      - name: Frontend typecheck & build
+        run: bun run --cwd app/ui build

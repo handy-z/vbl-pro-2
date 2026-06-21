@@ -1,0 +1,10 @@
+/target
+**/target
+node_modules
+dist
+/release
+# Tauri build-generated capability schemas
+/app/src-tauri/gen/schemas
+*.log
+.DS_Store
+Thumbs.db

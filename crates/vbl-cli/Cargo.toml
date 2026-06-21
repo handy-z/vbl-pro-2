@@ -1,0 +1,14 @@
+[package]
+name = "vbl-cli"
+description = "Headless runner for the engine (testing / power users)."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "vbl-cli"
+path = "src/main.rs"
+
+[dependencies]
+vbl-core = { path = "../vbl-core" }
+vbl-engine = { path = "../vbl-engine" }

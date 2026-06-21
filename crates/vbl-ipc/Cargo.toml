@@ -1,0 +1,15 @@
+[package]
+name = "vbl-ipc"
+description = "Serialized contract shared between the engine and the UI (specta bindings in M3)."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+vbl-core = { path = "../vbl-core" }
+serde = { workspace = true }
+specta = { workspace = true, optional = true }
+
+[features]
+
+specta = ["dep:specta", "vbl-core/specta"]

@@ -81,8 +81,12 @@ fn tauri_build(root: &Path, no_bundle: bool) -> Res {
 }
 
 fn bundle(root: &Path) -> Res {
-    tauri_build(root, false)?;
+    // Clear old installers so a stale version can't be collected into the release.
     let dir = root.join("app/src-tauri/target/release/bundle/nsis");
+    if dir.exists() {
+        fs::remove_dir_all(&dir)?;
+    }
+    tauri_build(root, false)?;
     let installers = find_with_ext(&dir, "exe");
     if installers.is_empty() {
         return Err(format!("no NSIS installer found in {}", dir.display()).into());

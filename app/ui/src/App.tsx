@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { relaunch } from "@tauri-apps/plugin-process";
-import { check } from "@tauri-apps/plugin-updater";
+import { check, type Update } from "@tauri-apps/plugin-updater";
 import {
   activeProfile,
   arm,
@@ -10,6 +10,7 @@ import {
   exportProfile,
   getConfig,
   getStatus,
+  getVersion,
   importProfile,
   listProfiles,
   onLog,
@@ -39,6 +40,9 @@ export function App() {
   const [profiles, setProfiles] = useState<string[]>([]);
   const [active, setActive] = useState<string>("");
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [version, setVersion] = useState<string>("");
+  const [update, setUpdate] = useState<Update | null>(null);
+  const [updating, setUpdating] = useState(false);
 
   const refreshProfiles = () => {
     listProfiles()
@@ -58,6 +62,13 @@ export function App() {
       .then((c) => mounted && setConfig(c))
       .catch(() => {});
     refreshProfiles();
+    getVersion()
+      .then((v) => mounted && setVersion(v))
+      .catch(() => {});
+    // Check for a newer release on launch; if one exists, the footer shows an Update button.
+    check()
+      .then((u) => mounted && setUpdate(u))
+      .catch(() => {});
     const unStatus = onStatus(setStatus);
     const unLog = onLog((l) => setLogs((prev) => [...prev, l].slice(-200)));
     return () => {
@@ -100,19 +111,26 @@ export function App() {
       .catch(() => {});
   };
 
+  // Manual re-check (the launch check already ran); updates the footer button if one appears.
   const checkForUpdates = async () => {
     try {
-      const update = await check();
-      if (!update) {
-        alert("You're on the latest version.");
-        return;
-      }
-      if (confirm(`Update ${update.version} is available. Install and restart now?`)) {
-        await update.downloadAndInstall();
-        await relaunch();
-      }
+      const u = await check();
+      setUpdate(u);
+      if (!u) alert("You're on the latest version.");
     } catch {
       alert("Update check failed (no published release or offline).");
+    }
+  };
+
+  const applyUpdate = async () => {
+    if (!update || updating) return;
+    setUpdating(true);
+    try {
+      await update.downloadAndInstall();
+      await relaunch();
+    } catch {
+      setUpdating(false);
+      alert("Update failed to install.");
     }
   };
 
@@ -206,9 +224,18 @@ export function App() {
           Bring Roblox to the foreground, then use Mouse Back / Forward. F1 = reset, F2 = toggle
           ultimate.
         </span>
-        <button className="link" onClick={checkForUpdates}>
-          Check for updates
-        </button>
+        <span className="version">
+          {version && <span className="muted">v{version}</span>}
+          {update ? (
+            <button className="update" onClick={applyUpdate} disabled={updating}>
+              {updating ? "Updating…" : `Update to v${update.version}`}
+            </button>
+          ) : (
+            <button className="link" onClick={checkForUpdates}>
+              Check for updates
+            </button>
+          )}
+        </span>
       </footer>
     </main>
   );

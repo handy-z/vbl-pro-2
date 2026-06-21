@@ -27,6 +27,10 @@ export function pickPixel(): Promise<PixelPick | null> {
   return commands.pickPixel();
 }
 
+export function getVersion(): Promise<string> {
+  return commands.getVersion();
+}
+
 export function suggestTolerance(on: Rgb, off: Rgb): Promise<Tolerance> {
   return commands.suggestTolerance(on, off);
 }

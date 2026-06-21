@@ -254,6 +254,30 @@ body {
   white-space: nowrap;
   text-decoration: underline;
 }
+.version {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.version .muted {
+  color: var(--muted);
+  opacity: 0.8;
+}
+.update {
+  background: var(--accent);
+  color: #06131f;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+.update:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 
 .tabs {
   display: flex;

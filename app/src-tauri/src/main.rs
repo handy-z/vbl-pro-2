@@ -174,6 +174,13 @@ fn suggest_tolerance(on: Rgb, off: Rgb) -> Tolerance {
     Tolerance::separating(on, off)
 }
 
+/// The running app version (from the crate version, stamped at build time).
+#[tauri::command]
+#[specta::specta]
+fn get_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
 #[tauri::command]
 #[specta::specta]
 fn pick_pixel(state: State<'_, AppState>) -> Option<PixelPick> {
@@ -253,6 +260,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
             export_profile,
             import_profile,
             suggest_tolerance,
+            get_version,
             pick_pixel,
             sample_capture,
             recent_injections,

@@ -44,6 +44,8 @@ export const commands = {
 	importProfile: (path: string) => typedError<VblSettings_Serialize, string>(__TAURI_INVOKE("import_profile", { path })),
 	/**  Compute a tolerance that matches the `on` color but not the `off` sample (auto-calibration). */
 	suggestTolerance: (on: Rgb, off: Rgb) => __TAURI_INVOKE<Tolerance>("suggest_tolerance", { on, off }),
+	/**  The running app version (from the crate version, stamped at build time). */
+	getVersion: () => __TAURI_INVOKE<string>("get_version"),
 	pickPixel: () => __TAURI_INVOKE<{
 	x: number,
 	y: number,

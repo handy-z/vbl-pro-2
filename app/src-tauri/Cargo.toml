@@ -22,9 +22,11 @@ specta = { version = "=2.0.0-rc.25", features = ["derive", "function"] }
 specta-typescript = "0.0.12"
 tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
 
-# Tuned for fast release builds. This app is event/timer-driven (Win32 hooks, overlay),
-# not CPU-bound, so LTO + single-codegen-unit buy little runtime but cost a lot of compile time.
+# Optimized release: thin LTO + O3 + strip. codegen-units = 16 (instead of 1) keeps most of the
+# optimization while compiling much faster — single-codegen-unit buys little for this
+# event/timer-driven app but costs a lot of build time. CI gets its speed from caching, not from
+# dropping optimization.
 [profile.release]
-lto = false
+lto = "thin"
 codegen-units = 16
 strip = true

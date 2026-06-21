@@ -87,6 +87,9 @@ fn bundle(root: &Path) -> Res {
     if !has_tool("cargo", ["tauri", "--version"], root) {
         return Err("`cargo tauri` not found — install with `cargo install tauri-cli`".into());
     }
+    // Build the UI first (Tauri's beforeBuildCommand is a no-op to avoid a cwd-relative hook);
+    // `cargo tauri build` then bundles the prebuilt dist.
+    run("bun", ["run", "--cwd", "app/ui", "build"], root)?;
     run("cargo", ["tauri", "build"], &root.join("app/src-tauri"))?;
     let dir = root.join("app/src-tauri/target/release/bundle/nsis");
     let installers = find_with_ext(&dir, "exe");
@@ -98,6 +101,8 @@ fn bundle(root: &Path) -> Res {
 
 /// Build the release exe and zip it into `release/` as a portable distribution.
 fn portable(root: &Path) -> Res {
+    // The release binary embeds the UI (frontendDist), so build it first.
+    run("bun", ["run", "--cwd", "app/ui", "build"], root)?;
     run(
         "cargo",
         ["build", "--manifest-path", APP_MANIFEST, "--release"],

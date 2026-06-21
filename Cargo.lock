@@ -523,7 +523,7 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "vbl-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "vbl-core",
  "vbl-engine",
@@ -531,7 +531,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -541,7 +541,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-engine"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -553,7 +553,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-ipc"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "specta",
@@ -562,7 +562,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-platform-win"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "vbl-core",
  "windows",
@@ -570,7 +570,7 @@ dependencies = [
 
 [[package]]
 name = "vbl-scripting"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "mlua",
  "thiserror 1.0.69",
@@ -737,7 +737,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "xtask"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde_json",
  "toml_edit",

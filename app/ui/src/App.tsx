@@ -165,9 +165,21 @@ export function App() {
   return (
     <main className="app">
       <ResizeHandles />
-      <header className="topbar" data-tauri-drag-region>
-        <div className="brand" data-tauri-drag-region>
-          VBL <span>Pro 2</span>
+      <header className="topbar">
+        <div className="topbar-row" data-tauri-drag-region>
+          <div className="brand" data-tauri-drag-region>
+            VBL <span>Pro 2</span>
+            {version && <span className="ver">v{version}</span>}
+          </div>
+          <div className="topright">
+            <button
+              className={`arm ${status.armed ? "armed" : ""}`}
+              onClick={() => (status.armed ? disarm() : arm())}
+            >
+              {status.armed ? "Disarm" : "Arm"}
+            </button>
+            <WindowControls />
+          </div>
         </div>
         <nav className="tabs">
           {TABS.map((t) => (
@@ -176,66 +188,56 @@ export function App() {
             </button>
           ))}
         </nav>
-        <div className="topright">
-          <button
-            className={`arm ${status.armed ? "armed" : ""}`}
-            onClick={() => (status.armed ? disarm() : arm())}
-          >
-            {status.armed ? "Disarm" : "Arm"}
-          </button>
-          <WindowControls />
-        </div>
       </header>
 
-      {tab === "dashboard" && <Dashboard status={status} />}
-      {tab === "config" && (config ? <Config config={config} onChange={applyConfig} /> : loading)}
-      {tab === "capture" &&
-        (config ? (
-          <Capture config={config} onChange={applyConfig} resolution={status.resolution} />
-        ) : (
-          loading
-        ))}
-      {tab === "macros" &&
-        (config ? (
-          <Macros
-            config={config}
-            onChange={applyConfig}
-            onReload={() => reloadScript().catch(() => {})}
+      <div className="content">
+        {tab === "dashboard" && <Dashboard status={status} />}
+        {tab === "config" && (config ? <Config config={config} onChange={applyConfig} /> : loading)}
+        {tab === "capture" &&
+          (config ? (
+            <Capture config={config} onChange={applyConfig} resolution={status.resolution} />
+          ) : (
+            loading
+          ))}
+        {tab === "macros" &&
+          (config ? (
+            <Macros
+              config={config}
+              onChange={applyConfig}
+              onReload={() => reloadScript().catch(() => {})}
+            />
+          ) : (
+            loading
+          ))}
+        {tab === "profiles" && (
+          <Profiles
+            profiles={profiles}
+            active={active}
+            onSwitch={handleSwitch}
+            onSaveAs={handleSaveAs}
+            onDelete={handleDelete}
+            onExport={handleExport}
+            onImport={handleImport}
           />
-        ) : (
-          loading
-        ))}
-      {tab === "profiles" && (
-        <Profiles
-          profiles={profiles}
-          active={active}
-          onSwitch={handleSwitch}
-          onSaveAs={handleSaveAs}
-          onDelete={handleDelete}
-          onExport={handleExport}
-          onImport={handleImport}
-        />
-      )}
-      {tab === "monitor" && <Monitor />}
-      {tab === "logs" && <Logs logs={logs} />}
+        )}
+        {tab === "monitor" && <Monitor />}
+        {tab === "logs" && <Logs logs={logs} />}
+      </div>
 
       <footer className="hint">
         <span>
           Bring Roblox to the foreground, then use Mouse Back / Forward. F1 = reset, F2 = toggle
           ultimate.
         </span>
-        <span className="version">
-          {version && <span className="muted">v{version}</span>}
-          {update ? (
-            <button className="update" onClick={applyUpdate} disabled={updating}>
-              {updating ? "Updating…" : `Update to v${update.version}`}
-            </button>
-          ) : (
-            <button className="link" onClick={checkForUpdates}>
-              Check for updates
-            </button>
-          )}
-        </span>
+        {update ? (
+          <button className="update" onClick={applyUpdate} disabled={updating}>
+            {updating ? "Updating…" : `Update to v${update.version}`}
+          </button>
+        ) : (
+          <button className="link" onClick={checkForUpdates}>
+            Check for updates
+          </button>
+        )}
       </footer>
     </main>
   );
